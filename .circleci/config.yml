@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:latest
+    working_directory: /go/src/github.com/bilbercode/yoti-encryption-server
+    steps:
+      - checkout
+      - run:
+          name: Aquiring GoDep
+          command: go get github.com/tools/godep
+      - run:
+          name: Restoring dependencies
+          command: godep restore
+#      - run:
+#          name: Building
+#          command: go install
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
