@@ -6,7 +6,7 @@ import (
 
 	"bytes"
 	"crypto/rand"
-	. "github.com/bilbercode/yoti-encryption-server/libcrypto"
+	. "github.com/bilbercode/encryption-server/libcrypto"
 )
 
 var _ = Describe("YotiCrypto", func() {
