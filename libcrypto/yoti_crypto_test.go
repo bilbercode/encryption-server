@@ -17,7 +17,7 @@ var _ = Describe("YotiCrypto", func() {
 			It("should return a new YotiCrypto", func() {
 				crypto, err := NewYotiCrypto(rand.Reader)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(crypto).To(BeAssignableToTypeOf(YotiCrypto{}))
+				Expect(crypto).To(BeAssignableToTypeOf(&YotiCrypto{}))
 			})
 		})
 
@@ -47,7 +47,7 @@ var _ = Describe("YotiCrypto", func() {
 
 		Context("configured with a weak rand source", func() {
 			It("should return an error", func() {
-				crypto, err := NewYotiCrypto(rand.Reader)
+				crypto, err := NewYotiCrypto(bytes.NewBuffer([]byte{12, 1}))
 				Expect(err).ToNot(HaveOccurred())
 				_, err = crypto.Encrypt([]byte("test"))
 				Expect(err).To(HaveOccurred())
@@ -70,14 +70,39 @@ var _ = Describe("YotiCrypto", func() {
 		})
 
 		Context("passed an invalid byte slice and key", func() {
-			It("should return an error", func() {
-				crypto, err := NewYotiCrypto(rand.Reader)
-				Expect(err).ToNot(HaveOccurred())
-				eRes, err := crypto.Encrypt([]byte("test"))
-				Expect(err).ToNot(HaveOccurred())
-				_, err = crypto.Decrypt([]byte("this should fail"), eRes.Key)
-				Expect(err).To(HaveOccurred())
+			Context("data to short", func() {
+				It("should return an error", func() {
+					crypto, err := NewYotiCrypto(rand.Reader)
+					Expect(err).ToNot(HaveOccurred())
+					eRes, err := crypto.Encrypt([]byte("test"))
+					Expect(err).ToNot(HaveOccurred())
+					_, err = crypto.Decrypt([]byte("this should fail"), eRes.Key)
+					Expect(err).To(HaveOccurred())
+				})
 			})
+
+			Context("data wrong block size", func() {
+				It("should return an error", func() {
+					crypto, err := NewYotiCrypto(rand.Reader)
+					Expect(err).ToNot(HaveOccurred())
+					eRes, err := crypto.Encrypt([]byte("test"))
+					Expect(err).ToNot(HaveOccurred())
+					_, err = crypto.Decrypt([]byte("this should fail, this should fail, this should fail"), eRes.Key)
+					Expect(err).To(HaveOccurred())
+				})
+			})
+
+			Context("data just wrong", func() {
+				It("should return an error", func() {
+					crypto, err := NewYotiCrypto(rand.Reader)
+					Expect(err).ToNot(HaveOccurred())
+					eRes, err := crypto.Encrypt([]byte("test"))
+					Expect(err).ToNot(HaveOccurred())
+					_, err = crypto.Decrypt([]byte("this should fail, this should :("), eRes.Key)
+					Expect(err).To(HaveOccurred())
+				})
+			})
+
 		})
 
 		Context("passed an invalid key and byte slice", func() {
