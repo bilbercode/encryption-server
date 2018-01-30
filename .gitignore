@@ -94,4 +94,6 @@ Temporary Items
 
 /yoti-encryption-server.coverprofile
 /junit.xml
-/coverage/
+coverage/
+*.coverprofile
+junit.xml
