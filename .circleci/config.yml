@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:latest
-    working_directory: /go/src/github.com/bilbercode/yoti-encryption-server
+    working_directory: /go/src/github.com/bilbercode/encryption-server
     steps:
       - checkout
       - run:
@@ -15,9 +15,42 @@ jobs:
 #      - run:
 #          name: Building
 #          command: go install
+  test_libcrypto:
+    docker:
+      - image: circleci/golang:latest
+    working_directory: /go/src/github.com/bilbercode/encryption-server
+    steps:
+      - checkout
+      - run:
+          name: Aquiring GoDep
+          command: go get github.com/tools/godep
+      - run:
+          name: Restoring dependencies
+          command: godep restore
+      - run:
+          name: Aquiring GinkGo
+          command: go get github.com/onsi/ginkgo/ginkgo
+      - run:
+          name: Aquiring GoMega
+          command: go get github.com/onsi/gomega/...
+      - run:
+          name: Run unit tests
+          working_directory: /go/src/github.com/bilbercode/encryption-server/libcrypto
+          command: |
+            ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress
+            mkdir coverage
+            go tool cover -html=libcrypto.coverprofile -o coverage/index.html
+      - store_test_results:
+          path: ./libcrypto/
+      - store_artifacts:
+          path: /go/src/github.com/bilbercode/encryption-server/libcrypto/coverage
+          destination: code-coverage
 
 workflows:
   version: 2
   build_and_test:
     jobs:
+      - test_libcrypto
       - build:
+          requires:
+            - test_libcrypto
