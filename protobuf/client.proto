@@ -1,0 +1,22 @@
+syntax = "proto3";
+package protobuf;
+
+message StoreRequest {
+    string ID = 1;
+    bytes data = 2;
+}
+
+message StoreResponse {
+    string ID = 1;
+    bytes key = 2;
+}
+
+message RetrieveRequest {
+    string ID = 1;
+    bytes key = 2;
+}
+
+message RetrieveResponse {
+    bytes data = 1;
+}
+

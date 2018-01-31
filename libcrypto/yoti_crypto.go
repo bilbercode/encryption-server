@@ -7,6 +7,9 @@ import (
 	"sync"
 	"crypto/cipher"
 	"bytes"
+	"golang.org/x/crypto/pbkdf2"
+	"crypto/sha512"
+	"encoding/hex"
 )
 
 var (
@@ -21,6 +24,13 @@ var (
 type YotiCrypto struct {
 	randSource io.Reader
 	randLock *sync.Mutex
+}
+
+// get the HEX string of the hash
+func (h Hash) ToHexString() string {
+	op := make([]byte, 32)
+	hex.Encode(op, h)
+	return string(op)
 }
 
 // Encrypt the data in a consistent manor
@@ -97,6 +107,24 @@ func (c *YotiCrypto) Decrypt(data []byte, key []byte) ([]byte, error) {
 	return clean, nil
 }
 
+// Creates a HASH of the id/key composite
+func (c *YotiCrypto) HashIdWithKey(id string, key []byte) Hash {
+	// create a clean composite key
+	clean := append([]byte(id), key...)
+	// just use the lat 8 bits from the end of the AES key
+	salt := key[:8]
+	/**
+	If this was a users credentials we would do this a couple of thousand times
+	at least, however it's only used here to completely obfuscate the original
+	ID from the one were going to use in storage
+	 */
+	iterations := int(key[len(key) - 1]) + 22
+	// create a hard to derive storage key
+	return pbkdf2.Key(clean, salt, iterations, 16, sha512.New)
+}
+
+
+
 // Generate a new YotiCrypto
 func NewYotiCrypto(rand io.Reader) (Crypto, error) {
 
@@ -146,3 +174,4 @@ func pkcs7Strip(data []byte) ([]byte, error) {
 	// return the data < the padding
 	return data[:(l - iBit)], nil
 }
+

@@ -1,0 +1,17 @@
+{
+  "hosts": [
+    "yoti-test"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C":  "UK",
+      "L":  "London",
+      "O":  "YoTi Dev Test",
+      "OU": "development"
+    }
+  ]
+}

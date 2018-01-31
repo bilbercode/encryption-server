@@ -116,4 +116,20 @@ var _ = Describe("YotiCrypto", func() {
 			})
 		})
 	})
+
+	Describe("HashIdWithKey", func() {
+
+
+		It("should not match the original composite", func() {
+			crypto, err := NewYotiCrypto(rand.Reader)
+			Expect(err).ToNot(HaveOccurred())
+			id := "this is a test ID"
+			key := []byte("everybody should really worry about the squirrels")
+			oc := crypto.HashIdWithKey(id, key)
+			comb := append([]byte(id), key...)
+			Expect(oc).ToNot(Equal(comb))
+
+		})
+	})
+
 })
